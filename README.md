@@ -8,8 +8,9 @@ Este repositório contém a API de exercícios baseada no projeto original de Yu
 
 A URL base para todas as requisições é:
 
-[API](https://libapi.vercel.app/api/exercises)
-
+```bash
+https://libapi.vercel.app/api/exercises
+```
 
 ### 1. Listar Todos os Exercícios
 
