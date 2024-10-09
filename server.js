@@ -1,4 +1,5 @@
 require('dotenv').config();
+const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const exerciseRoutes = require("./api/exerciseRoutes"); // Rota para exercícios
@@ -20,11 +21,21 @@ mongoose.connect(dbURI, {
 .catch(err => console.log('Erro ao conectar com o MongoDB:', err));
 
 // Middleware
-app.use(express.json());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*'); // Permitir requisições de qualquer origem
+  res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  next();
+});
+
 
 // Rotas
+app.use(cors());
 app.use("/api/exercises", exerciseRoutes); // Rota de exercícios
 app.use("/api", apiRoutes);
+app.get('/api/exercises', (req, res) => {
+  res.json({ message: 'Requisição permitida para qualquer origem' });
+});
 
 // Iniciando o servidor
 app.listen(PORT, () => {
