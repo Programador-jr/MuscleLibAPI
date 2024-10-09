@@ -179,7 +179,7 @@ Cada exercício tem uma pasta com o nome correspondente, contendo imagens numera
 1. Clone este repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/exercise-api.git
+ git https://github.com/Programador-jr/ExerciseApi.git
 ```
 
 2. Instale as dependências:
