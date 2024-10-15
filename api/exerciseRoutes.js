@@ -1,6 +1,13 @@
 const express = require('express');
+const Fuse = require('fuse.js');
 const router = express.Router();
 const Exercise = require('./Exercise');
+
+const fuseOptions = {
+    includeScore: true,
+    threshold: 0.4, // Ajusta a sensibilidade da busca (quanto menor, mais precisa)
+    keys: ['name']
+};
 
 // Rota para obter exercícios paginados
 router.get('/', async (req, res) => {
@@ -22,29 +29,24 @@ router.get('/', async (req, res) => {
 router.get('/search', async (req, res) => {
     const { query } = req.query;
 
-    try {
-        if (!query) {
-            return res.status(400).json({ message: 'Por favor, insira um termo de pesquisa' });
-        }
+    if (!query) {
+        return res.status(400).json({ message: 'Por favor, insira um termo de pesquisa' });
+    }
 
-        const suggestions = await Exercise.find({
-            $or: [
-                { name: { $regex: query, $options: 'i' } },
-                { equipment: { $regex: query, $options: 'i' } },
-                { primaryMuscles: { $regex: query, $options: 'i' } },
-                { secondaryMuscles: { $regex: query, $options: 'i' } }
-            ]
-        }).limit(5);
+    try {
+        const exercises = await Exercise.find(); // Obtém todos os exercícios do banco
+        const fuse = new Fuse(exercises, fuseOptions); // Cria instância do Fuse.js
+        const results = fuse.search(query); // Busca com aproximação
+        
+        const suggestions = results.map(result => result.item.name); // Pega os nomes dos exercícios sugeridos
 
         if (suggestions.length === 0) {
             return res.json({ message: 'Exercício não encontrado', suggestions: [] });
         }
 
-        const suggestionNames = suggestions.map(exercise => exercise.name);
-        res.json({ message: 'Acho que você quis dizer:', suggestions: suggestionNames });
+        res.json({ message: 'Acho que você quis dizer:', suggestions });
     } catch (error) {
-        console.error('Erro ao buscar sugestões de exercícios:', error);
-        res.status(500).json({ error: 'Erro ao buscar sugestões' });
+        res.status(500).json({ message: 'Erro ao buscar exercícios', error });
     }
 });
 
