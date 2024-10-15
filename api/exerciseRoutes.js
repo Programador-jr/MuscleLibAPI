@@ -38,7 +38,10 @@ router.get('/search', async (req, res) => {
         const fuse = new Fuse(exercises, fuseOptions); // Cria instância do Fuse.js
         const results = fuse.search(query); // Busca com aproximação
         
-        const suggestions = results.map(result => result.item.name); // Pega os nomes dos exercícios sugeridos
+        // Filtrar resultados para garantir que estamos pegando apenas os exercícios existentes
+        const suggestions = results
+            .map(result => result.item.name)
+            .filter((name, index, self) => self.indexOf(name) === index); // Remove duplicatas
 
         if (suggestions.length === 0) {
             return res.json({ message: 'Exercício não encontrado', suggestions: [] });
