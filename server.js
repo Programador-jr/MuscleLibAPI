@@ -3,7 +3,6 @@ const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const exerciseRoutes = require("./api/exerciseRoutes"); // Rota para exercícios
-const apiRoutes = require("./api/api");
 
 const dbURI = process.env.MONGODB_URI;
 const app = express();
@@ -23,7 +22,7 @@ mongoose.connect(dbURI, {
 // Middleware
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*'); // Permitir requisições de qualquer origem
-  res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS, POST, PUT, DELETE');
+  res.header('Access-Control-Allow-Methods', 'GET, HEAD');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
@@ -32,7 +31,6 @@ app.use((req, res, next) => {
 // Rotas
 app.use(cors());
 app.use("/api/exercises", exerciseRoutes); // Rota de exercícios
-app.use("/api", apiRoutes);
 app.get('/api/exercises', (req, res) => {
   res.json({ message: 'Requisição permitida para qualquer origem' });
 });
