@@ -37,17 +37,17 @@ router.get('/search', async (req, res) => {
         const exercises = await Exercise.find(); // Obtém todos os exercícios do banco
         const fuse = new Fuse(exercises, fuseOptions); // Cria instância do Fuse.js
         const results = fuse.search(query); // Busca com aproximação
-        
-        // Filtrar resultados para garantir que estamos pegando apenas os exercícios existentes
-        const suggestions = results
-            .map(result => result.item.name)
-            .filter((name, index, self) => self.indexOf(name) === index); // Remove duplicatas
 
-        if (suggestions.length === 0) {
-            return res.json({ message: 'Exercício não encontrado', suggestions: [] });
+        // Filtrar resultados para retornar os exercícios encontrados
+        const matchedExercises = results.map(result => result.item); // Pega os itens correspondentes
+
+        // Se não encontrou exercícios correspondentes, retornar sugestões
+        if (matchedExercises.length === 0) {
+            const suggestions = exercises.filter(exercise => exercise.name.toLowerCase().includes(query.toLowerCase())); // Filtra sugestões
+            return res.json({ message: 'Exercício não encontrado. Aqui estão algumas sugestões:', suggestions });
         }
 
-        res.json({ message: 'Acho que você quis dizer:', suggestions });
+        res.json({ message: 'Exercícios encontrados:', exercises: matchedExercises });
     } catch (error) {
         res.status(500).json({ message: 'Erro ao buscar exercícios', error });
     }
