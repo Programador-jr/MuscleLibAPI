@@ -27,16 +27,14 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/search', async (req, res) => {
-    const { query, page = 0, limit = 50 } = req.query;
+    const { query } = req.query;
 
     if (!query) {
         return res.status(400).json({ message: 'Por favor, insira um termo de pesquisa' });
     }
 
     try {
-        const exercises = await Exercise.find() // Obtém todos os exercícios do banco
-            .skip(page * limit)
-            .limit(limit);
+        const exercises = await Exercise.find(); // Obtém todos os exercícios do banco
             
         const fuse = new Fuse(exercises, fuseOptions); // Cria instância do Fuse.js
         const results = fuse.search(query); // Busca com aproximação
