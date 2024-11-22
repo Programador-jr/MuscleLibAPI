@@ -11,7 +11,11 @@ const PORT = process.env.PORT || 8080;
 mongoose.set('strictQuery', false);
 
 // Conexão com MongoDB
-mongoose.connect(dbURI)
+mongoose.connect(dbURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 30000,  // Tempo de timeout aumentado para 30 segundos
+})
 .then(() => console.log('MongoDB conectado com sucesso!'))
 .catch(err => console.log('Erro ao conectar com o MongoDB:', err));
 
