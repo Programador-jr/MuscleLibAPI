@@ -1,203 +1,189 @@
-# Exercise API - Documentação
+# Documentação da API MuscleLib
 
-Este repositório contém a API de exercícios baseada no projeto original de Yuhonas, disponível [aqui](https://github.com/yuhonas/free-exercise-db). A API fornece dados de diversos exercícios de musculação, com informações como nome, músculos primários, equipamentos utilizados e instruções.
+Este repositório contém a API de exercícios baseada no projeto original de Yuhonas, disponível [aqui](https://github.com/yuhonas/free-exercise-db). 
+<br>A **API MuscleLib** fornece uma lista de exercícios de musculação, permitindo que os usuários pesquisem e filtrem os exercícios de acordo com suas necessidades.
 
-## Endpoints Disponíveis:
+## Endpoints
 
-### Base URL
+### 1. Obter todos os exercícios
 
-A URL base para todas as requisições é:
-
-```bash
-https://libapi.vercel.app/api/exercises
-```
-
-### 1. Listar Todos os Exercícios
-
-**Descrição**:<br>Retorna uma lista completa de exercícios, com informações detalhadas.
-
+**URL**: `/api/exercises`  
 **Método**: `GET`
 
-**Endpoint**: 
-``/api/exercises``
+Recupera uma lista de todos os exercícios disponíveis na API.
 
-**Resposta**:
-
-```json
-[
-  {
-    "id": "1",
-    "name": "3/4 Sit-Up",
-    "force": "pull",
-    "level": "beginner",
-    "mechanic": "compound",
-    "equipment": "body only",
-    "primaryMuscles": ["abdominals"],
-    "secondaryMuscles": ["obliques"],
-    "instructions": [
-      "Deite-se de costas com os joelhos dobrados e os pés no chão.",
-      "Coloque suas mãos atrás da cabeça.",
-      "Levante a parte superior do seu corpo até cerca de 45 graus e depois desça."
-    ],
-    "category": "strength",
-    "images": [
-      "/exercises/3_4_Sit-Up/0.jpg",
-      "/exercises/3_4_Sit-Up/1.jpg"
-    ]
-  },
-]
-```
-## 2. Filtrar Exercícios por Parâmetros
-
-**Descrição:**<br>Permite filtrar exercícios com base em parâmetros específicos.
-
-Método: ``GET``
-
-**Endpoint:**
-
-``/api/exercises``
-
-**Parâmetros de Query:**
-
-|Parâmetro| Tipo | Descrição|
-|---------|------|----------|
-|name|	string |  Filtra  por nome do exercício (ex: 3/4 Sit-Up) |
-|primaryMuscles|	string |	Filtra pelo músculo primário envolvido (ex: abdominals) |
-|equipment |	string |	Filtra por equipamento necessário (ex: body only) |
-|level |	string |	Filtra por nível de dificuldade (beginner, intermediate, advanced) |
-|category |	string |	Filtra pela categoria (ex: strength, cardio) |
-
-**Exemplo de Requisição:**
-
-```sql
-GET /api/exercises?level=beginner&equipment=body%20only
-```
-**Resposta:**
-
-```json
-[
-  {
-    "id": "1",
-    "name": "3/4 Sit-Up",
-    "force": "pull",
-    "level": "beginner",
-    "mechanic": "compound",
-    "equipment": "body only",
-    "primaryMuscles": ["abdominals"],
-    "secondaryMuscles": ["obliques"],
-    "instructions": [
-      "Deite-se de costas com os joelhos dobrados e os pés no chão.",
-      "Coloque suas mãos atrás da cabeça.",
-      "Levante a parte superior do seu corpo até cerca de 45 graus e depois desça."
-    ],
-    "category": "strength",
-    "images": [
-      "/exercises/3_4_Sit-Up/0.jpg",
-      "/exercises/3_4_Sit-Up/1.jpg"
-    ]
-  }
-]
-```
-### Estrutura dos Exercícios
-
-**Cada exercício contém os seguintes campos:**
-
-- *id:* Identificador único do exercício.
-- *name:* Nome do exercício.
-- *force:* Tipo de força utilizada no movimento (ex: *pull* ou *push*).
-- *level:* Nível de dificuldade (ex: *beginner, intermediate, advanced*).
-- *mechanic:* Tipo de mecânica do exercício (*compound* ou *isolation*).
-- *equipment:* Equipamento necessário (ex: *body only, dumbbell*).
-- *primaryMuscles:* Principais músculos trabalhados.
-- *secondaryMuscles:* Músculos secundários envolvidos.
-- *instructions:* Lista de instruções passo a passo para executar o exercício.
-- *category:* Categoria do exercício (ex: *strength, cardio*).
-- *images:* Links para imagens ilustrativas do exercício.
-
-## 3. Obter Detalhes de um Exercício Específico
-
-**Descrição:**<br>Retorna as informações de um exercício específico a partir do id.
-
-Método: ``GET``
-
-**Endpoint:**
-
-```sql
-/api/exercises/:id
-```
-
-**Exemplo de Requisição:**
-
-```sql
-GET /api/exercises/1
-```
-**Resposta:**
-
+**Exemplo de resposta**:
 ```json
 {
-  "id": "1",
+  "_id": "6740c419026094d35227a20f",
   "name": "3/4 Sit-Up",
   "force": "pull",
   "level": "beginner",
   "mechanic": "compound",
   "equipment": "body only",
-  "primaryMuscles": ["abdominals"],
-  "secondaryMuscles": ["obliques"],
+  "primaryMuscles": [
+    "abdominals"
+  ],
+  "secondaryMuscles": [],
   "instructions": [
-    "Deite-se de costas com os joelhos dobrados e os pés no chão.",
-    "Coloque suas mãos atrás da cabeça.",
-    "Levante a parte superior do seu corpo até cerca de 45 graus e depois desça."
+    "Lie down on the floor and secure your feet. Your legs should be bent at the knees.",
+    "Place your hands behind or to the side of your head. You will begin with your back on the ground. This will be your starting position.",
+    "Flex your hips and spine to raise your torso toward your knees.",
+    "At the top of the contraction your torso should be perpendicular to the ground. Reverse the motion, going only ¾ of the way down.",
+    "Repeat for the recommended amount of repetitions."
   ],
   "category": "strength",
   "images": [
-    "/exercises/3_4_Sit-Up/0.jpg",
-    "/exercises/3_4_Sit-Up/1.jpg"
+    "3_4_Sit-Up/0.jpg",
+    "3_4_Sit-Up/1.jpg"
+  ],
+  "id": "3_4_Sit-Up",
+  "__v": 0
+}
+```
+
+### 2. Pesquisa de exercícios
+
+**URL**: `/api/exercises/search?query={query}`  
+**Método**: `GET`
+
+Permite pesquisar exercícios pelo nome. A pesquisa é feita de forma eficiente utilizando a biblioteca **Fuse.js**, o que permite buscas por termos parciais.
+
+#### 2.1. Pesquisa com sucesso (exemplo: `query=crucifix`)
+
+**Exemplo de requisição**:
+```bash
+GET https://libapi.vercel.app/api/exercises/search?query=crucifix
+```
+
+**Exemplo de resposta**:
+```json
+{
+  "message": "Exercícios encontrados:",
+  "exercises": [
+    {
+      "_id": "6740c419026094d35227a2c8",
+      "name": "Crucifix",
+      "force": "static",
+      "level": "beginner",
+      "mechanic": "isolation",
+      "equipment": "other",
+      "primaryMuscles": [
+        "shoulders"
+      ],
+      "secondaryMuscles": [
+        "forearms"
+      ],
+      "instructions": [
+        "In the crucifix, you statically hold weights out to the side for time. While the event can be practiced using dumbbells, it is best to practice with one of the various implements used, such as axes and hammers, as it feels different.",
+        "Begin standing, and raise your arms out to the side holding the implements. Your arms should be parallel to the ground. In competition, judges or sensors are used to let you know when you break parallel. Hold for as long as you can. Typically, the weights should be heavy enough that you fail in 30-60 seconds."
+      ],
+      "category": "strongman",
+      "images": [
+        "Crucifix/0.jpg",
+        "Crucifix/1.jpg"
+      ],
+      "id": "Crucifix",
+      "__v": 0
+    }
   ]
 }
 ```
-### Imagens dos Exercícios
 
-As imagens de cada exercício estão disponíveis no seu repositório local dentro da pasta *public/exercises/.*<br>
-Cada exercício tem uma pasta com o nome correspondente, contendo imagens numeradas para cada etapa do movimento.
+#### 2.2. Pesquisa sem um parâmetro de busca (exemplo: `query=`)
 
-**Exemplo:**
-- Caminho das imagens do exercício "3/4 Sit-Up":
-> - /public/exercises/3_4_Sit-Up/0.jpg
-> - /public/exercises/3_4_Sit-Up/1.jpg
-
-## Observações
-- A API é somente para leitura. Não há suporte para criação, edição ou exclusão de exercícios.
-- As informações dos exercícios são provenientes da Free Exercise Database, criada por **Yuhonas**. Se utilizar este projeto, considere dar os devidos créditos ao autor original.
-
-### Tecnologias Utilizadas
-- **Node.js:** Ambiente de execução JavaScript no backend.
-- **Express.js:** Framework web usado para criar e gerenciar as rotas da API.
-- **MongoDB:** Banco de dados NoSQL utilizado para armazenar os dados dos exercícios.
-- **Vercel:** Plataforma utilizada para hospedar a API.
-
-### Instruções de Uso
-1. Clone este repositório:
-
+**Exemplo de requisição**:
 ```bash
- git https://github.com/Programador-jr/ExerciseApi.git
+GET https://libapi.vercel.app/api/exercises/search?query=
 ```
 
-2. Instale as dependências:
+**Exemplo de resposta**:
+```json
+{
+  "message": "Por favor, insira um termo de pesquisa"
+}
+```
 
+#### 2.3. Pesquisa com palavra não encontrada (exemplo: `query=3/5`)
+
+**Exemplo de requisição**:
 ```bash
-npm install
+GET https://libapi.vercel.app/api/exercises/search?query=3/5
 ```
 
-3. Inicie o servidor:
+**Exemplo de resposta**:
+```json
+{
+  "message": "Exercícios encontrados:",
+  "exercises": [
+    {
+      "_id": "6740c419026094d35227a20f",
+      "name": "3/4 Sit-Up",
+      "force": "pull",
+      "level": "beginner",
+      "mechanic": "compound",
+      "equipment": "body only",
+      "primaryMuscles": [
+        "abdominals"
+      ],
+      "secondaryMuscles": [],
+      "instructions": [
+        "Lie down on the floor and secure your feet. Your legs should be bent at the knees.",
+        "Place your hands behind or to the side of your head. You will begin with your back on the ground. This will be your starting position.",
+        "Flex your hips and spine to raise your torso toward your knees.",
+        "At the top of the contraction your torso should be perpendicular to the ground. Reverse the motion, going only ¾ of the way down.",
+        "Repeat for the recommended amount of repetitions."
+      ],
+      "category": "strength",
+      "images": [
+        "3_4_Sit-Up/0.jpg",
+        "3_4_Sit-Up/1.jpg"
+      ],
+      "id": "3_4_Sit-Up",
+      "__v": 0
+    }
+  ]
+}
+```
 
+### 3. Exemplos de erros
+
+#### 3.1. Nenhum exercício encontrado
+
+**Exemplo de resposta** (quando não há resultados para a pesquisa):
+```json
+{
+  "message": "Por favor, insira um termo de pesquisa"
+}
+```
+
+#### 3.2. Parâmetro `query` ausente
+
+**Exemplo de resposta** (quando o parâmetro `query` não for fornecido na requisição):
+```json
+{
+  "message": "Por favor, insira um termo de pesquisa"
+}
+```
+
+## Como Usar
+
+1. **Acessar todos os exercícios**: Acesse a URL `https://libapi.vercel.app/api/exercises` para obter a lista completa de exercícios.
+2. **Pesquisar um exercício**: Use a URL `https://libapi.vercel.app/api/exercises/search?query={termo}` para buscar um exercício específico, substituindo `{termo}` pela palavra-chave de sua escolha.
+
+## Exemplo de Uso com cURL
+
+### Buscar por exercício específico:
 ```bash
-npm start
+curl -X GET "https://libapi.vercel.app/api/exercises/search?query=agachamento"
 ```
 
-4. Acesse a API em:
-```sql
-http://localhost:3000/api/exercises.
+### Obter todos os exercícios:
+```bash
+curl -X GET "https://libapi.vercel.app/api/exercises"
 ```
+## Licença
 
-### Licença
-Este projeto está sob a licença MIT. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
+---
+
+Distribuído sob a Licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais informações.
