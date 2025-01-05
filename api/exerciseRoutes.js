@@ -84,10 +84,15 @@ router.get("/search", async (req, res) => {
         secondaryMuscles: exercise.secondaryMuscles[lang],
         instructions: exercise.instructions[lang],
         category: exercise.category[lang],
-        images: exercise.images,
+        images: [
+          `/exercises/${exercise.id}/0.jpg`,
+          `/exercises/${exercise.id}/1.jpg`,
+        ],
         id: exercise.id,
       };
     });
+    
+    res.json(formattedExercises);
 
     if (matchedExercises.length === 0) {
       return res.json({ message: "Exercício não encontrado." });
