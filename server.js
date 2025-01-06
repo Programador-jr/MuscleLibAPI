@@ -13,8 +13,6 @@ mongoose.set("strictQuery", false);
 
 // Conexão com MongoDB
 mongoose.connect(dbURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   socketTimeoutMS: 45000, // Tempo limite do socket (opcional)
   serverSelectionTimeoutMS: 45000 // Tempo para seleção do servidor
 })
@@ -25,6 +23,7 @@ mongoose.connect(dbURI, {
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/exercises", express.static(__dirname + "/exercises"));
 app.use("/api/exercises", exerciseRoutes); // Usar rotas atualizadas
 
 app.get("/", (req, res) => {
