@@ -9,6 +9,30 @@ const fuseOptions = {
   keys: ["name.en", "name.pt"], // Busca em ambos os idiomas
 };
 
+// Mensagens de erro localizadas
+const errorMessages = {
+  invalidLang: {
+    en: "Invalid language. Use 'en' or 'pt'.",
+    pt: "Idioma inválido. Use 'en' ou 'pt'.",
+  },
+  missingQuery: {
+    en: "Please provide a search term.",
+    pt: "Por favor, insira um termo de pesquisa.",
+  },
+  noResults: {
+    en: "Exercise not found.",
+    pt: "Exercício não encontrado.",
+  },
+  fetchError: {
+    en: "Error fetching exercises.",
+    pt: "Erro ao buscar os exercícios.",
+  },
+  searchError: {
+    en: "Error searching exercises.",
+    pt: "Erro ao buscar exercícios.",
+  },
+};
+
 // Rota para obter exercícios paginados em um idioma específico
 router.get("/", async (req, res) => {
   try {
@@ -17,7 +41,9 @@ router.get("/", async (req, res) => {
     const lang = req.query.lang || "en"; // Idioma padrão é inglês
 
     if (!["en", "pt"].includes(lang)) {
-      return res.status(400).json({ message: "Idioma inválido. Use 'en' ou 'pt'." });
+      return res
+        .status(400)
+        .json({ message: errorMessages.invalidLang[lang] || errorMessages.invalidLang.en });
     }
 
     const exercises = await Exercise.find()
@@ -43,8 +69,15 @@ router.get("/", async (req, res) => {
 
     res.json(formattedExercises);
   } catch (err) {
-    console.error("Erro ao buscar exercícios:", err);
-    res.status(500).json({ message: "Erro ao buscar os exercícios", error: err.message });
+    console.error(
+      lang === "pt"
+        ? `${errorMessages.fetchError.pt}: ${err.message}`
+        : `${errorMessages.fetchError.en}: ${err.message}`
+    );
+    res.status(500).json({
+      message: errorMessages.fetchError[lang] || errorMessages.fetchError.en,
+      error: err.message,
+    });
   }
 });
 
@@ -53,11 +86,15 @@ router.get("/search", async (req, res) => {
   const { query, lang = "en" } = req.query;
 
   if (!["en", "pt"].includes(lang)) {
-    return res.status(400).json({ message: "Idioma inválido. Use 'en' ou 'pt'." });
+    return res
+      .status(400)
+      .json({ message: errorMessages.invalidLang[lang] || errorMessages.invalidLang.en });
   }
 
   if (!query) {
-    return res.status(400).json({ message: "Por favor, insira um termo de pesquisa" });
+    return res
+      .status(400)
+      .json({ message: errorMessages.missingQuery[lang] || errorMessages.missingQuery.en });
   }
 
   try {
@@ -91,16 +128,24 @@ router.get("/search", async (req, res) => {
         id: exercise.id,
       };
     });
-    
-    res.json(formattedExercises);
 
+    // Se nenhum exercício foi encontrado
     if (matchedExercises.length === 0) {
-      return res.json({ message: "Exercício não encontrado." });
+      return res.json({ message: errorMessages.noResults[lang] || errorMessages.noResults.en });
     }
 
-    res.json({ message: "Exercícios encontrados:", exercises: matchedExercises });
+    // Retornar os exercícios encontrados
+    res.json({ message: "Exercises found:", exercises: matchedExercises });
   } catch (err) {
-    res.status(500).json({ message: "Erro ao buscar exercícios", error: err.message });
+    console.error(
+      lang === "pt"
+        ? `${errorMessages.searchError.pt}: ${err.message}`
+        : `${errorMessages.searchError.en}: ${err.message}`
+    );
+    res.status(500).json({
+      message: errorMessages.searchError[lang] || errorMessages.searchError.en,
+      error: err.message,
+    });
   }
 });
 
