@@ -37,8 +37,8 @@ const exerciseSchema = new mongoose.Schema({
     en: { type: String, required: true },
     pt: { type: String, required: true } 
   },
-  images: { type: [String], required: true }, // Imagens permanecem inalteradas
-  id: { type: String, required: true, unique: true } // ID permanece inalterado
+  images: { type: [String], required: true },
+  id: { type: String, required: true, unique: true }
 });
 
 module.exports = mongoose.model("Exercise", exerciseSchema);
