@@ -28,6 +28,10 @@ const errorMessages = {
     en: "Please provide a search term.",
     pt: "Por favor, insira um termo de pesquisa.",
   },
+  invalideParamettersPageLimit: {
+    en: "The 'page' and 'limit' parameters cannot be empty.",
+    pt: "Os parâmetros 'page' e 'limit' não podem estar vazios.",
+  },
   invalidPage: {
     en: "parameter 'page' is invalid. use a value greater than or equal to 0.",
     pt: "Parâmetro 'page' inválido. use um valor maior ou igual a 0.",
@@ -35,6 +39,10 @@ const errorMessages = {
   invalidLimit: {
     en: "parameter 'limit' is invalid. use a value greater than 0.",
     pt: "Parâmetro 'limit' inválido. use um valor maior que 0",
+  },
+  invalidValue: {
+    en: "The ${key} provided is incorrect or does not exist in the database. Try:",
+    pt: "O ${key} inserido está incorreto ou não existe no banco de dados. Tente:",
   },
   resultesFound: {
     en: "Exercises found:",
@@ -98,19 +106,70 @@ router.get("/", async (req, res) => {
     }
   }
 
+
+  // Filtros dinâmicos
   try {
-    // Filtros dinâmicos
-    for (const [key, value] of Object.entries(req.query)) {
-      if (!["lang", "fields", "page", "limit"].includes(key)) {
-        if (["primaryMuscles", "secondaryMuscles", "level"].includes(key)) {
-          query[`${key}.${lang}`] = value; // Campo multilíngue
-        } else {
-          query[key] = value; // Outros filtros
+    // Obter valores únicos do banco de dados para validação
+    const rawForces = await Exercise.distinct('force');
+    const rawLevels = await Exercise.distinct("level");
+    const rawCategories = await Exercise.distinct("category");
+    const rawEquipments = await Exercise.distinct("equipment");
+    const rawPrimaryMuscles = await Exercise.distinct("primaryMuscles");
+    const rawSecondaryMuscles = await Exercise.distinct("secondaryMuscles");
+
+  // Função para extrair valores e garantir que não retornem 'en'
+  const extractValues = (data) => {
+    return data
+      .map((item) => (typeof item === "object" ? item[lang] : item)) // Retorna a tradução ou o item original
+      .filter((item) => typeof item === "string" && item !== "en" && item !== "pt"); // Filtra valores inválidos (como 'en' ou 'pt')
+  };
+
+  const avaliableForces = extractValues(rawForces);
+  const avaliableLevels = extractValues(rawLevels);
+  const avaliableCategories = extractValues(rawCategories);
+  const avaliableEquipments = extractValues(rawEquipments);
+  const avaliablePrimaryMuscles = extractValues(rawPrimaryMuscles);
+  const avaliableSecondaryMuscles = extractValues(rawSecondaryMuscles);
+
+  const filters = {
+    force: avaliableForces,
+    level: avaliableLevels,
+    category: avaliableCategories,
+    equipment: avaliableEquipments,
+    primaryMuscles: avaliablePrimaryMuscles,
+    secondaryMuscles: avaliableSecondaryMuscles
+  };
+
+  for (const [key, value] of Object.entries(req.query)) {
+    if (!["lang", "fields", "page", "limit"].includes(key)) {
+      if (["primaryMuscles", "secondaryMuscles", "level", "force", "equipment", "category"].includes(key)) {
+        if (!filters[key].includes(value)) {
+          return res.status(400).json({
+            message: errorMessages.invalidValue[lang].replace("${key}", key),
+            avaliableOptions: filters[key]
+          });
         }
+        query[`${key}.${lang}`] = new RegExp(`^${value}`, "i");
+      } else {
+        query[key] = value; // Outros filtros
       }
     }
+  }
+
+  const exercise = await Exercise.findOne(query).lean();
+  if (!exercise) {
+    return res.status(404).json({
+      message: errorMessages.noResults[lang],
+    });
+  }
 
     // Validação para 'page' e 'limit'
+    if (req.query.page == "" || req.query.limit == "") {
+      return res.status(400).json({
+        message: errorMessages.invalideParamettersPageLimit[lang]
+      });
+    }
+
     let page = req.query.page ? parseInt(req.query.page, 10) : 0;
     let limit = req.query.limit ? parseInt(req.query.limit, 10) : 50;
 
