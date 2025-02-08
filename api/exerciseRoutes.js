@@ -6,7 +6,7 @@ const Exercise = require("./Exercise");
 // Configurações do Fuse.js
 const fuseOptions = {
   includeScore: true,
-  threshold: 0.4,
+  threshold: 0.5,
   keys: ["name.en", "name.pt"],
 };
 
@@ -51,6 +51,14 @@ const errorMessages = {
   noResults: {
     en: "No exercises found.",
     pt: "Nenhum exercício encontrado.",
+  },
+  noTranslation: {
+    en: "Exercise not available in the selected language. Try:",
+    pt: "Exercício não disponível no idioma selecionado. Tente:",
+  },
+  noSugestions:{
+    en: "No suggestions available.",
+    pt: "Nenhuma sugestão disponível.",
   },
   fetchError: {
     en: "Error fetching exercises.",
@@ -243,52 +251,56 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Rota para buscar exercícios
+// Endpoint para buscar exercícios com sugestões de correção e tradução
 router.get("/search", async (req, res) => {
   const { query, lang = "en", fields } = req.query;
 
-  // Validar idioma
+  // Pegar o idioma do sistema (Accept-Language) caso lang seja inválido
+  let userLang = req.headers["accept-language"]?.split(",")[0].split("-")[0]; // Exemplo: "es-ES" -> "es"
+
+  // Se lang for inválido, tenta usar o idioma do sistema, senão, define "en" como padrão
+  const selectedLang = ["en", "pt"].includes(lang) ? lang : (["en", "pt"].includes(userLang) ? userLang : "en");
+
+  // Se o idioma for inválido, retorna o erro na linguagem correta
   if (!["en", "pt"].includes(lang)) {
-    return res
-      .status(400)
-      .json({ message: errorMessages.invalidLang[lang] });
+    return res.status(400).json({ message: errorMessages.invalidLang[selectedLang] });
   }
 
   // Validar termo de busca
   if (!query) {
-    return res
-      .status(400)
-      .json({ message: errorMessages.missingQuery[lang] });
+    return res.status(400).json({ message: errorMessages.missingQuery[lang] });
   }
 
   try {
     // Recuperar todos os exercícios
     const exercises = await Exercise.find().lean();
 
-    // Configurar Fuse.js com base no idioma
-    const fuse = new Fuse(exercises, {
-      ...fuseOptions,
-      keys: [`name.${lang}`],
-    });
-
-    // Realizar busca
+    // Configurar Fuse.js para busca
+    const fuse = new Fuse(exercises, fuseOptions);
     const results = fuse.search(query);
 
-    // Verificar se há resultados
+    // Se não houver correspondência, sugerir um nome parecido
     if (results.length === 0) {
-      return res.json({ message: errorMessages.noResults[lang] });
+      const closestMatch = fuse.search(query, { limit: 1 })[0];
+      return res.json({
+        message: `${errorMessages.noResults[lang]} ${closestMatch ? closestMatch.item.name[lang] : `${errorMessages.noSugestions[lang]}`}`,
+      });
     }
 
-    // Converter resultados e aplicar `fields`, se fornecido
-    const fieldList = fields ? fields.split(",") : null;
-    const matchedExercises = results.map((result) => {
-      const exercise = result.item;
+    // Verificar se o exercício está disponível no idioma solicitado
+    const filteredResults = results.filter(result => result.item.name[lang]);
 
-      // Montar resposta com todos os campos ou apenas os selecionados
-      const response = {
-        _id: exercise._id,
-        name: exercise.name[lang],
-      };
+    if (filteredResults.length === 0) {
+      return res.json({
+        message: `${errorMessages.noTranslation[lang]} ${results[0].item.name.en}`,
+      });
+    }
+
+    // Processar os resultados com os campos solicitados
+    const fieldList = fields ? fields.split(",") : null;
+    const matchedExercises = filteredResults.map(result => {
+      const exercise = result.item;
+      const response = { _id: exercise._id, name: exercise.name[lang] };
 
       if (!fieldList || fieldList.includes("force")) {
         response.force = exercise.force[lang];
@@ -324,13 +336,9 @@ router.get("/search", async (req, res) => {
       return response;
     });
 
-   res.json({ message: errorMessages.resultesFound[lang], exercises: matchedExercises });
+    res.json({ exercises: matchedExercises });
   } catch (err) {
-    console.error(
-      lang === "pt"
-        ? `${errorMessages.searchError.pt}: ${err.message}`
-        : `${errorMessages.searchError.en}: ${err.message}`
-    );
+    console.error(`${errorMessages.searchError[lang]}: ${err.message}`);
     res.status(500).json({
       message: errorMessages.searchError[lang],
       error: err.message,
