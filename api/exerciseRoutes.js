@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const Fuse = require("fuse.js");
 const router = express.Router();
@@ -6,7 +8,7 @@ const Exercise = require("./Exercise");
 // Configurações do Fuse.js
 const fuseOptions = {
   includeScore: true,
-  threshold: 0.5,
+  threshold: 0.4,
   keys: ["name.en", "name.pt"],
 };
 
@@ -67,6 +69,10 @@ const errorMessages = {
   searchError: {
     en: "Error searching exercises.",
     pt: "Erro ao buscar exercícios.",
+  },
+  notFoundImage: {
+    en: "image not found in the database, check the name and try again",
+    pt: "Imagem não encontrada no banco de dados, verifique o nome e tente novamente",
   },
 };
 
@@ -341,6 +347,55 @@ router.get("/search", async (req, res) => {
     console.error(`${errorMessages.searchError[lang]}: ${err.message}`);
     res.status(500).json({
       message: errorMessages.searchError[lang],
+      error: err.message,
+    });
+  }
+});
+
+// Endpoint para servir imagens de exercícios com tratamento de erro personalizado
+router.get("/:exerciseName/:imageIndex.jpg", async (req, res) => {
+  const { exerciseName, imageIndex } = req.params;
+
+  // Detecta o idioma do usuário a partir do cabeçalho "Accept-Language"
+  const acceptedLanguages = req.headers["accept-language"] || "";
+  const userLang = acceptedLanguages.split(",")[0].split("-")[0]; 
+  
+    // Define o idioma padrão
+  const lang = ["en", "pt"].includes(userLang) ? userLang : "en";
+
+  try {
+    // Procurar o exercício pelo campo 'id' (assumindo que 'exerciseName' corresponde ao campo 'id')
+    const exercise = await Exercise.findOne({ id: exerciseName }).lean();
+
+    if (!exercise) {
+      // Se não encontrar, usar Fuse.js para sugerir um nome semelhante
+      const allExercises = await Exercise.find().lean();
+      const fuse = new Fuse(allExercises, { keys: ["id"], threshold: 0.4 });
+      const suggestionResult = fuse.search(exerciseName, { limit: 1 });
+      const suggestion = suggestionResult.length > 0 ? suggestionResult[0].item.id : null;
+      
+      return res.status(400).json({
+        message: errorMessages.invalidValue[lang].replace("{key}", "exerciseName"),
+        availableOptions: suggestion ? [suggestion] : [errorMessages.noSugestions[lang]],
+      });
+    }
+
+    // Construir o caminho para a imagem, assumindo que as imagens estão em '../exercises/<exercise.id>/'
+    const imagePath = path.join(__dirname, "../exercises", exercise.id, `${imageIndex}.jpg`);
+
+    // Verificar se o arquivo existe
+    if (!fs.existsSync(imagePath)) {
+      return res.status(400).json({
+        message: errorMessages.notFoundImage[lang],
+      });
+    }
+
+    // Se existir, enviar o arquivo
+    res.sendFile(imagePath);
+  } catch (err) {
+    console.error(`${errorMessages.fetchError[lang]}: ${err.message}`);
+    res.status(500).json({
+      message: errorMessages.fetchError[lang],
       error: err.message,
     });
   }
