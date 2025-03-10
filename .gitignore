@@ -1,5 +1,4 @@
 # Logs
-page
 logs
 *.log
 npm-debug.log*
@@ -92,7 +91,6 @@ out
 .nuxt
 dist
 dest
-models
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
