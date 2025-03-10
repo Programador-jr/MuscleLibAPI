@@ -4,19 +4,11 @@
 
 Welcome to the **MuscleLib API Documentation**! 📚  
 
-This repository contains the official documentation for the **MuscleLib API**, a free and open-source library for retrieving exercise data.  
-
-## 🌟 Features  
-
-- **Comprehensive Documentation**: Detailed descriptions of all available endpoints.  
-- **Dark/Light Mode Support**: Theme toggle for a better visual experience.  
-- **Search Functionality**: Quickly find endpoint information.  
-- **Multi-Language Support**: Automatic translations available.  
-- **Responsive Design**: Optimized for both mobile and desktop devices.  
+This repository contains the official documentation for the **MuscleLib API**, a free and open-source library for retrieving exercise data.   
 
 ## 🚀 Access the Documentation  
 
-📌 [MuscleLib API Documentation](https://libapi.vercel.app/page/docs.html)  
+📌 [MuscleLib API Documentation](https://libapi.vercel.app/)  
 
 ## 📌 API Endpoints  
 
@@ -24,10 +16,9 @@ This repository contains the official documentation for the **MuscleLib API**, a
 |--------|--------------------------------|-------------|
 | GET    | `/api/exercises`              | Returns all exercises |
 | GET    | `/api/exercises/search?query={name}` | Searches exercises by name |
-| GET    | `/api/exercises/{id}`         | Returns a specific exercise by ID |
-| GET    | `/api/images/{exercise_name}` | Returns images of the exercise |
+| GET    | `/api/images/{exerciseName}/{exerciseIndex}` | Returns images of the exercise |
 
-For more details, check out the [full documentation](https://libapi.vercel.app/page/docs).  
+For more details, check out the [full documentation](https://libapi.vercel.app/docs).  
 
 ## 📄 License  
 
